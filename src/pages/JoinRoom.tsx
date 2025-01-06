@@ -5,18 +5,18 @@ import { EnterRoom } from "../icons/EnterRoom";
 import { Redirect } from "../icons/Redirect";
 import { funnyHeadings } from "./funnyHeading";
 import { SERVER_URL } from "../config";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { Room } from "./Room";
 
 export const JoinRoom = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [heading, setHeading] = useState(funnyHeadings[Math.floor(Math.random() * funnyHeadings.length)]);
     const nameRef = useRef<HTMLInputElement>(null);
     const roomIdRef = useRef<HTMLInputElement>(null);
-    const [isRoomJoined, setIsRoomJoined] = useState("false"); // Track if the user joined a room
-    
-    const navigate = useNavigate(); // Hook for navigation
+    const [isRoomJoined, setIsRoomJoined] = useState(false); // Track if the user joined a room
+    // const [username, setUsername] = useState("");
+    // const [roomId, setRoomId] = useState("");
 
-    // Connecting to the Websocket Server:
+    // Connecting to the WebSocket Server:
     useEffect(() => {
         const ws = new WebSocket(SERVER_URL);
 
@@ -54,63 +54,70 @@ export const JoinRoom = () => {
         return () => clearInterval(interval);
     }, []);
 
-    
-
     // Handle Join Room Button Click
     const joinRoom = () => {
-        const roomId = roomIdRef.current?.value;
-        const username = nameRef.current?.value;
+        const enteredRoomId = roomIdRef.current?.value;
+        const enteredUsername = nameRef.current?.value;
 
-        if (roomId && username) {
+        if (enteredRoomId && enteredUsername) {
             socket?.send(
                 JSON.stringify({
                     type: "join",
                     payload: {
-                        roomId,
-                        username,
+                        roomId: enteredRoomId,
+                        username: enteredUsername,
                     },
                 })
             );
-            localStorage.setItem("roomJoined", "true");
-            navigate(`/room`); // Redirect to room page
+
+            // Update states to indicate room joined
+            // setUsername(enteredUsername);
+            // setRoomId(enteredRoomId);
+            setIsRoomJoined(true);
         }
     };
 
     return (
-        <div className="flex justify-center mt-10 bg-custom-1 px-4 sm:px-6 md:px-10 lg:px-20">
-            <div className="bg-gray-900 text-white p-8 sm:p-12 md:p-16 lg:p-32 rounded-2xl gap-y-4 hover:-translate-y-4 cursor-pointer transition-all duration-500 shadow-lg shadow-blue-200 hover:shadow-2xl hover:shadow-emerald-200 flex flex-col items-center w-full max-w-4xl">
-                <div className="text-md font-semibold flex">
-                    <div className="mr-1">Made by</div>
-                    <div onClick={() => { window.open("https://github.com/Shubhashish-Chakraborty"); }} className="text-blue-400 hover:underline flex">
-                        Shubhashish <Redirect />
+        <div className="bg-custom-1 min-h-screen">
+            {isRoomJoined ? (
+                <Room socket={socket as WebSocket}/>
+            ) : (
+                <div className="flex justify-center mt-10 bg-custom-1 px-4 sm:px-6 md:px-10 lg:px-20">
+                    <div className="bg-gray-900 text-white p-8 sm:p-12 md:p-16 lg:p-32 rounded-2xl gap-y-4 hover:-translate-y-4 cursor-pointer transition-all duration-500 shadow-lg shadow-blue-200 hover:shadow-2xl hover:shadow-emerald-200 flex flex-col items-center w-full max-w-4xl">
+                        <div className="text-md font-semibold flex">
+                            <div className="mr-1">Made by</div>
+                            <div onClick={() => { window.open("https://github.com/Shubhashish-Chakraborty"); }} className="text-blue-400 hover:underline flex">
+                                Shubhashish <Redirect />
+                            </div>
+                        </div>
+
+                        <h2 className="text-2xl md:text-3xl font-bold text-center mt-4 mb-6">
+                            {heading}
+                        </h2>
+
+                        <h3 className="text-emerald-300 font-bold text-lg md:text-xl mb-6">
+                            Create a private room & Chat
+                        </h3>
+
+                        <div className="w-full mb-4">
+                            <Input placeholder="Your Name" type="text" ref={nameRef} />
+                        </div>
+
+                        <div className="w-full mb-4">
+                            <Input placeholder="Room Code" type="text" ref={roomIdRef} />
+                        </div>
+
+                        <div className="w-full flex justify-center">
+                            <Button
+                                variant="other"
+                                text="Join Room"
+                                endIcon={<EnterRoom />}
+                                onClick={joinRoom} // Use the joinRoom function
+                            />
+                        </div>
                     </div>
                 </div>
-
-                <h2 className="text-2xl md:text-3xl font-bold text-center mt-4 mb-6">
-                    {heading}
-                </h2>
-
-                <h3 className="text-emerald-300 font-bold text-lg md:text-xl mb-6">
-                    Create a private room & Chat
-                </h3>
-
-                <div className="w-full mb-4">
-                    <Input placeholder="Your Name" type="text" ref={nameRef} />
-                </div>
-
-                <div className="w-full mb-4">
-                    <Input placeholder="Room Code" type="text" ref={roomIdRef} />
-                </div>
-
-                <div className="w-full flex justify-center">
-                    <Button
-                        variant="other"
-                        text="Join Room"
-                        endIcon={<EnterRoom />}
-                        onClick={joinRoom} // Use the joinRoom function
-                    />
-                </div>
-            </div>
+            )}
         </div>
     );
 };
