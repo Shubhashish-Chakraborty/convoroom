@@ -5,16 +5,15 @@ import { NotFound } from "./pages/NotFound";
 
 export default function App() {
     return (
-        <div className="h-screen bg-custom-1">
+        <div className="bg-custom-1 min-h-screen">
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<Layout/>}>
-                        <Route path="/" element={<JoinRoom/>}></Route>
-                        <Route path="/" element={<JoinRoom/>}></Route>
-                        <Route path="*" element={<NotFound/>}></Route>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<JoinRoom />} />
+                        <Route path="*" element={<NotFound />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
         </div>
-    )
+    );
 }
