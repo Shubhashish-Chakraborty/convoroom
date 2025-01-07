@@ -7,6 +7,7 @@ import { funnyHeadings } from "./funnyHeading";
 import { SERVER_URL } from "../config";
 import { Room } from "./Room";
 import { Navbar } from "../components/Navbar";
+import { Copy } from "../icons/Copy";
 
 export const JoinRoom = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -14,6 +15,8 @@ export const JoinRoom = () => {
     const nameRef = useRef<HTMLInputElement>(null);
     const roomIdRef = useRef<HTMLInputElement>(null);
     const [isRoomJoined, setIsRoomJoined] = useState(false); // Track if the user joined a room
+    const [copyMessage, setCopyMessage] = useState("");
+    const [copyMessageStatus, setCopyMessageStatus] = useState<"success" | "error" | null>(null);
     // const [username, setUsername] = useState("");
     // const [roomId, setRoomId] = useState("");
 
@@ -78,6 +81,22 @@ export const JoinRoom = () => {
         }
     };
 
+    const copyRoomCode = () => {
+        const enteredRoomId = roomIdRef.current?.value;
+        if (enteredRoomId) {
+            navigator.clipboard
+                .writeText(enteredRoomId)
+                .then(() => {
+                    setCopyMessage("Copied to clipboard, Now Share!");
+                    setCopyMessageStatus("success");
+                })
+                .catch((err) => alert("Failed to copy text: " + err));
+        } else {
+            setCopyMessage("Enter a Room Code to Copy!");
+            setCopyMessageStatus("error");
+        }
+    }
+
     return (
         <div className="bg-custom-1 min-h-screen flex flex-col">
             {isRoomJoined ? (
@@ -115,6 +134,22 @@ export const JoinRoom = () => {
 
                             <div className="w-full mb-4">
                                 <Input placeholder="Room Code" type="text" ref={roomIdRef} />
+
+                                <div className="flex mt-2 justify-end">
+                                    <Button
+                                        variant="primary"
+                                        text="Copy Code"
+                                        endIcon={<Copy />}
+                                        onClick={copyRoomCode}
+                                    />
+
+                                </div>
+                                <div
+                                    className={`text-center font-bold mt-2 ${copyMessageStatus === "success" ? "text-green-500" : copyMessageStatus === "error" ? "text-red-500" : ""
+                                        }`}
+                                >
+                                    {copyMessage}
+                                </div>
                             </div>
 
                             <div className="w-full flex justify-center">
@@ -124,6 +159,7 @@ export const JoinRoom = () => {
                                     endIcon={<EnterRoom />}
                                     onClick={joinRoom} // Use the joinRoom function
                                 />
+
                             </div>
                         </div>
                     </div>
