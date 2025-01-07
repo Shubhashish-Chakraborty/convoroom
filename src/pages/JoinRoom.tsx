@@ -111,7 +111,7 @@ export const JoinRoom = () => {
                                 <div
                                     onClick={() => {
                                         window.open(
-                                            "https://github.com/Shubhashish-Chakraborty"
+                                            "https://shubhhere.vercel.app"
                                         );
                                     }}
                                     className="text-blue-400 hover:underline flex"
