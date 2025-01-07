@@ -6,6 +6,7 @@ import { Redirect } from "../icons/Redirect";
 import { funnyHeadings } from "./funnyHeading";
 import { SERVER_URL } from "../config";
 import { Room } from "./Room";
+import { Navbar } from "../components/Navbar";
 
 export const JoinRoom = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -78,46 +79,57 @@ export const JoinRoom = () => {
     };
 
     return (
-        <div className="bg-custom-1 min-h-screen">
+        <div className="bg-custom-1 min-h-screen flex flex-col">
             {isRoomJoined ? (
-                <Room socket={socket as WebSocket}/>
+                <Room socket={socket as WebSocket} />
             ) : (
-                <div className="flex justify-center mt-10 bg-custom-1 px-4 sm:px-6 md:px-10 lg:px-20">
-                    <div className="bg-gray-900 text-white p-8 sm:p-12 md:p-16 lg:p-32 rounded-2xl gap-y-4 hover:-translate-y-4 cursor-pointer transition-all duration-500 shadow-lg shadow-blue-200 hover:shadow-2xl hover:shadow-emerald-200 flex flex-col items-center w-full max-w-4xl">
-                        <div className="text-md font-semibold flex">
-                            <div className="mr-1">Made by</div>
-                            <div onClick={() => { window.open("https://github.com/Shubhashish-Chakraborty"); }} className="text-blue-400 hover:underline flex">
-                                Shubhashish <Redirect />
+                <>
+                    <Navbar /> {/* Ensure Navbar is placed correctly at the top */}
+                    <div className="flex justify-center items-center flex-grow px-4 sm:px-6 md:px-10 lg:px-20">
+                        <div className="bg-gray-900 text-white p-8 sm:p-12 md:p-16 lg:p-32 rounded-2xl gap-y-4 hover:-translate-y-4 cursor-pointer transition-all duration-500 shadow-lg shadow-blue-200 hover:shadow-2xl hover:shadow-emerald-200 flex flex-col items-center w-full max-w-4xl">
+                            <div className="text-md font-semibold flex">
+                                <div className="mr-1">Made by</div>
+                                <div
+                                    onClick={() => {
+                                        window.open(
+                                            "https://github.com/Shubhashish-Chakraborty"
+                                        );
+                                    }}
+                                    className="text-blue-400 hover:underline flex"
+                                >
+                                    Shubhashish <Redirect />
+                                </div>
+                            </div>
+
+                            <h2 className="text-2xl md:text-3xl font-bold text-center mt-4 mb-6">
+                                {heading}
+                            </h2>
+
+                            <h3 className="text-emerald-300 font-bold text-lg md:text-xl mb-6">
+                                Create a private room & Chat
+                            </h3>
+
+                            <div className="w-full mb-4">
+                                <Input placeholder="Your Name" type="text" ref={nameRef} />
+                            </div>
+
+                            <div className="w-full mb-4">
+                                <Input placeholder="Room Code" type="text" ref={roomIdRef} />
+                            </div>
+
+                            <div className="w-full flex justify-center">
+                                <Button
+                                    variant="other"
+                                    text="Join Room"
+                                    endIcon={<EnterRoom />}
+                                    onClick={joinRoom} // Use the joinRoom function
+                                />
                             </div>
                         </div>
-
-                        <h2 className="text-2xl md:text-3xl font-bold text-center mt-4 mb-6">
-                            {heading}
-                        </h2>
-
-                        <h3 className="text-emerald-300 font-bold text-lg md:text-xl mb-6">
-                            Create a private room & Chat
-                        </h3>
-
-                        <div className="w-full mb-4">
-                            <Input placeholder="Your Name" type="text" ref={nameRef} />
-                        </div>
-
-                        <div className="w-full mb-4">
-                            <Input placeholder="Room Code" type="text" ref={roomIdRef} />
-                        </div>
-
-                        <div className="w-full flex justify-center">
-                            <Button
-                                variant="other"
-                                text="Join Room"
-                                endIcon={<EnterRoom />}
-                                onClick={joinRoom} // Use the joinRoom function
-                            />
-                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
+
     );
 };
