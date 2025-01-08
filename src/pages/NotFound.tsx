@@ -1,4 +1,3 @@
-import { Navbar } from "../components/Navbar";
 import { Redirect } from "../icons/Redirect";
 import { useNavigate } from "react-router-dom";
 
