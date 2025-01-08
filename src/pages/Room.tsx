@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 
 export const Room = ({ socket }: { socket: WebSocket }) => {
-    const [messages, setMessages] = useState<{ name: string; message: string }[]>([]);
+    const [messages, setMessages] = useState<{ name: string; message: string, room:string }[]>([]);
     const messageInputRef = useRef<HTMLInputElement>(null);
 
     // Listen for incoming messages from the WebSocket
@@ -55,8 +55,9 @@ export const Room = ({ socket }: { socket: WebSocket }) => {
                                 alignSelf: msg.name === "You" ? "flex-end" : "flex-start",
                             }}
                         >
-                            <div className="text-sm font-semibold text-emerald-300">{msg.name}</div>
-                            <div className="mt-1 text-md">{msg.message}</div>
+                            <div className="text-lg cursor-pointer font-semibold text-emerald-300"> <span className="hover:underline">{msg.name}</span> <span className="text-white">||</span> <span className="text-purple-300 hover:underline">{msg.room}</span></div>
+                            <div className="mt-1 cursor-pointer text-md font-semibold">{msg.message}</div>
+                            {/* <div className="mt-1 cursor-pointer text-md font-semibold">{msg.room}</div> */}
                         </div>
                     ))
                 ) : (
