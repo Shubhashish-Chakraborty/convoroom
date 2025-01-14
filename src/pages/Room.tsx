@@ -40,6 +40,13 @@ export const Room = ({ socket }: { socket: WebSocket }) => {
         }
     };
 
+    // Trigger sendMessage on Enter key press
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    };
+
     return (
         <div className="flex flex-col h-screen bg-gray-900 text-white">
             {/* Messages Section */}
@@ -70,6 +77,7 @@ export const Room = ({ socket }: { socket: WebSocket }) => {
                 <input
                     type="text"
                     ref={messageInputRef}
+                    onKeyDown={handleKeyDown}
                     placeholder="Type your message..."
                     className="flex-1 px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
                 />
