@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { Button } from "../components/ui/Button";
 
 export const Room = ({ socket }: { socket: WebSocket }) => {
     const [messages, setMessages] = useState<{ name: string; message: string, room: string }[]>([]);
@@ -49,14 +50,20 @@ export const Room = ({ socket }: { socket: WebSocket }) => {
 
     return (
         <div className="flex flex-col h-screen bg-gray-900 text-white">
-            <div className="flex justify-center p-4">
-                {messages.length > 0 && messages[0]?.room && (
-                    <div className="max-w-lg px-4 py-2 rounded-lg bg-gray-600 transition-all animate-bounce duration-300">
-                        <div className="text-lg text-center cursor-pointer text-white font-semibold">
-                            Welcome to the room <span className="text-red-500 hover:underline hover:-translate-y-2 font-bold">{messages[0].room} </span> !
+            <div className="">
+                <div className="flex mt-3 justify-center">
+                    <Button variant="other" text="Leave Room" onClick={() => {window.location.reload()}}/>
+                </div>
+
+                <div className="flex justify-center p-4">
+                    {messages.length > 0 && messages[0]?.room && (
+                        <div className="max-w-lg px-4 py-2 rounded-lg bg-gray-600 transition-all animate-bounce duration-300">
+                            <div className="text-lg text-center cursor-pointer text-white font-semibold">
+                                Welcome to the room <span className="text-red-500 hover:underline hover:-translate-y-2 font-bold">{messages[0].room} </span> !
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
             {/* Messages Section */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
