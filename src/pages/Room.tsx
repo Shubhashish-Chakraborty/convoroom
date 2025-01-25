@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 
 export const Room = ({ socket }: { socket: WebSocket }) => {
-    const [messages, setMessages] = useState<{ name: string; message: string, room:string }[]>([]);
+    const [messages, setMessages] = useState<{ name: string; message: string, room: string }[]>([]);
     const messageInputRef = useRef<HTMLInputElement>(null);
 
     // Listen for incoming messages from the WebSocket
@@ -49,22 +49,29 @@ export const Room = ({ socket }: { socket: WebSocket }) => {
 
     return (
         <div className="flex flex-col h-screen bg-gray-900 text-white">
+            <div className="flex justify-center p-4">
+                {messages.length > 0 && messages[0]?.room && (
+                    <div className="max-w-lg px-4 py-2 rounded-lg bg-gray-600 transition-all animate-bounce duration-300">
+                        <div className="text-lg text-center cursor-pointer text-white font-semibold">
+                            Welcome to the room <span className="text-red-500 hover:underline hover:-translate-y-2 font-bold">{messages[0].room} </span> !
+                        </div>
+                    </div>
+                )}
+            </div>
             {/* Messages Section */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
                         <div
                             key={index}
-                            className={`max-w-lg px-4 py-2 rounded-lg ${
-                                msg.name === "You" ? "bg-blue-600 self-end" : "bg-gray-700"
-                            }`}
+                            className={`max-w-lg px-4 py-2 rounded-lg hover:-translate-y-2 transition-all duration-300 ${msg.name === "You" ? "bg-blue-600 self-end" : "bg-gray-700"
+                                }`}
                             style={{
                                 alignSelf: msg.name === "You" ? "flex-end" : "flex-start",
                             }}
                         >
-                            <div className="text-lg cursor-pointer font-semibold text-emerald-300"> <span className="hover:underline">{msg.name}</span> <span className="text-white">||</span> <span className="text-purple-300 hover:underline">{msg.room}</span></div>
+                            <div className="text-lg cursor-pointer font-semibold text-emerald-300"> <span className="text-white">||</span> <span className="hover:underline">{msg.name}</span> <span className="text-white">||</span></div>
                             <div className="mt-1 cursor-pointer text-md font-semibold">{msg.message}</div>
-                            {/* <div className="mt-1 cursor-pointer text-md font-semibold">{msg.room}</div> */}
                         </div>
                     ))
                 ) : (
