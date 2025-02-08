@@ -11,16 +11,15 @@ import { Copy } from "../icons/Copy";
 
 export const JoinRoom = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
-    const [heading, setHeading] = useState(funnyHeadings[Math.floor(Math.random() * funnyHeadings.length)]);
+    const [displayedText, setDisplayedText] = useState("");
+    const [index, setIndex] = useState(0);
     const nameRef = useRef<HTMLInputElement>(null);
     const roomIdRef = useRef<HTMLInputElement>(null);
-    const [isRoomJoined, setIsRoomJoined] = useState(false); // Track if the user joined a room
+    const [isRoomJoined, setIsRoomJoined] = useState(false);
     const [copyMessage, setCopyMessage] = useState("");
     const [copyMessageStatus, setCopyMessageStatus] = useState<"success" | "error" | null>(null);
-    // const [username, setUsername] = useState("");
-    // const [roomId, setRoomId] = useState("");
 
-    // Connecting to the WebSocket Server:
+    // Connecting to WebSocket Server:
     useEffect(() => {
         const ws = new WebSocket(SERVER_URL);
 
@@ -50,13 +49,31 @@ export const JoinRoom = () => {
         };
     }, []);
 
+    // Typing Effect for Headings
     useEffect(() => {
-        const interval = setInterval(() => {
-            setHeading(funnyHeadings[Math.floor(Math.random() * funnyHeadings.length)]);
-        }, 1800);
+        let charIndex = 0;
+        const currentText = funnyHeadings[index];
 
-        return () => clearInterval(interval);
-    }, []);
+        setDisplayedText(""); // Reset text before animation starts
+
+        const timeout = setTimeout(() => {
+            const interval = setInterval(() => {
+                if (charIndex < currentText.length) {
+                    setDisplayedText((prev) => prev + currentText.charAt(charIndex));
+                    charIndex++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        setIndex((prevIndex) => (prevIndex + 1) % funnyHeadings.length);
+                    }, 2000);
+                }
+            }, 100);
+
+            return () => clearInterval(interval);
+        }, 50);
+
+        return () => clearTimeout(timeout);
+    }, [index]);
 
     // Handle Join Room Button Click
     const joinRoom = () => {
@@ -73,10 +90,6 @@ export const JoinRoom = () => {
                     },
                 })
             );
-
-            // Update states to indicate room joined
-            // setUsername(enteredUsername);
-            // setRoomId(enteredRoomId);
             setIsRoomJoined(true);
         }
     };
@@ -95,7 +108,7 @@ export const JoinRoom = () => {
             setCopyMessage("Enter a Room Code to Copy!");
             setCopyMessageStatus("error");
         }
-    }
+    };
 
     return (
         <div className="bg-custom-1 min-h-screen flex flex-col">
@@ -103,16 +116,14 @@ export const JoinRoom = () => {
                 <Room socket={socket as WebSocket} />
             ) : (
                 <>
-                    <Navbar /> {/* Ensure Navbar is placed correctly at the top */}
+                    <Navbar />
                     <div className="flex justify-center items-center flex-grow px-4 sm:px-6 md:px-10 lg:px-20">
                         <div className="bg-gray-900 text-white p-8 sm:p-12 md:p-16 lg:p-32 rounded-2xl gap-y-4 hover:-translate-y-4 cursor-pointer transition-all duration-500 shadow-lg shadow-blue-200 hover:shadow-2xl hover:shadow-emerald-200 flex flex-col items-center w-full max-w-4xl">
                             <div className="text-md font-semibold flex">
                                 <div className="mr-1">Made by</div>
                                 <div
                                     onClick={() => {
-                                        window.open(
-                                            "https://shubhhere.vercel.app"
-                                        );
+                                        window.open("https://shubhhere.vercel.app");
                                     }}
                                     className="text-blue-400 hover:underline flex"
                                 >
@@ -121,7 +132,7 @@ export const JoinRoom = () => {
                             </div>
 
                             <h2 className="text-2xl md:text-3xl font-bold text-center mt-4 mb-6">
-                                {heading}
+                                {displayedText}
                             </h2>
 
                             <h3 className="text-emerald-300 font-bold text-lg md:text-xl mb-6">
@@ -134,7 +145,6 @@ export const JoinRoom = () => {
 
                             <div className="w-full mb-4">
                                 <Input placeholder="Room Code" type="text" ref={roomIdRef} />
-
                                 <div className="flex mt-2 justify-end">
                                     <Button
                                         variant="primary"
@@ -142,30 +152,27 @@ export const JoinRoom = () => {
                                         endIcon={<Copy />}
                                         onClick={copyRoomCode}
                                     />
-
                                 </div>
                                 <div
-                                    className={`text-center font-bold mt-2 ${copyMessageStatus === "success" ? "text-green-500" : copyMessageStatus === "error" ? "text-red-500" : ""
-                                        }`}
+                                    className={`text-center font-bold mt-2 ${
+                                        copyMessageStatus === "success"
+                                            ? "text-green-500"
+                                            : copyMessageStatus === "error"
+                                            ? "text-red-500"
+                                            : ""
+                                    }`}
                                 >
                                     {copyMessage}
                                 </div>
                             </div>
 
                             <div className="w-full flex justify-center">
-                                <Button
-                                    variant="other"
-                                    text="Join Room"
-                                    endIcon={<EnterRoom />}
-                                    onClick={joinRoom} // Use the joinRoom function
-                                />
-
+                                <Button variant="other" text="Join Room" endIcon={<EnterRoom />} onClick={joinRoom} />
                             </div>
                         </div>
                     </div>
                 </>
             )}
         </div>
-
     );
 };
