@@ -123,7 +123,7 @@ export const JoinRoom = () => {
                                 <div className="mr-1">Made by</div>
                                 <div
                                     onClick={() => {
-                                        window.open("https://shubhhere.vercel.app");
+                                        window.open("https://imshubh.site");
                                     }}
                                     className="text-blue-400 hover:underline flex"
                                 >
