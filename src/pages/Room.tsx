@@ -1,92 +1,140 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "../components/ui/Button";
+import toast, { Toaster } from "react-hot-toast";
 
-export const Room = ({ socket }: { socket: WebSocket }) => {
-    const [messages, setMessages] = useState<{ name: string; message: string, room: string }[]>([]);
+export const Room = ({ socket, username }: { socket: WebSocket; username: string }) => {
+    const [messages, setMessages] = useState<{
+        name: string;
+        message: string;
+        room: string;
+        isYou?: boolean;
+        type?: string;
+        timestamp?: string;
+    }[]>([]);
+    // Sometimes it is okay to ts-ignore!
+    //@ts-ignore
+    const [roomName, setRoomName] = useState("");
     const messageInputRef = useRef<HTMLInputElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [hasSent, setHasSent] = useState(false);
 
-    // Listen for incoming messages from the WebSocket
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     useEffect(() => {
         if (socket) {
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                if (data.message && data.name) {
-                    setMessages((prevMessages) => [...prevMessages, data]);
+
+                if (data.type === "system") {
+                    toast(data.message, {
+                        icon: data.message.includes("joined") ? "👋" : "🚪",
+                        position: "top-center"
+                    });
+                    return;
+                }
+
+                if (data.type === "chat") {
+                    // Only add if we haven't already added it via optimistic update
+                    if (!hasSent || data.name !== username) {
+                        setMessages(prev => [...prev, {
+                            ...data,
+                            isYou: data.name === username
+                        }]);
+                    }
+                    setHasSent(false);
                 }
             };
         }
-    }, [socket]);
 
-    // Handle sending a message
+        return () => {
+            if (socket) socket.onmessage = null;
+        };
+    }, [socket, username, hasSent]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
     const sendMessage = () => {
-        const textMessage = messageInputRef.current?.value;
+        const textMessage = messageInputRef.current?.value.trim();
+        if (!textMessage) return;
 
-        if (textMessage) {
-            socket.send(
-                JSON.stringify({
-                    type: "chat",
-                    payload: {
-                        textMessage,
-                    },
-                })
-            );
+        // Optimistic update
+        setMessages(prev => [...prev, {
+            name: username,
+            message: textMessage,
+            room: roomName,
+            isYou: true,
+            timestamp: new Date().toISOString()
+        }]);
+        setHasSent(true);
 
-            // Add "You" message to the state
-            // setMessages((prevMessages) => [
-            //     ...prevMessages,
-            //     { name: "You", message: textMessage },
-            // ]);
+        socket.send(JSON.stringify({
+            type: "chat",
+            payload: { textMessage }
+        }));
 
-            messageInputRef.current.value = ""; // Clear the input after sending
+        if (messageInputRef.current) {
+            messageInputRef.current.value = "";
+            messageInputRef.current.focus();
         }
     };
 
-    // Trigger sendMessage on Enter key press
+    const leaveRoom = () => {
+        socket.send(JSON.stringify({ type: "leave", payload: {} }));
+        window.location.reload();
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            sendMessage();
-        }
+        if (e.key === "Enter") sendMessage();
     };
 
     return (
         <div className="flex flex-col h-screen bg-gray-900 text-white">
+            <Toaster />
             <div className="">
                 <div className="flex mt-3 justify-center">
-                    <Button variant="other" text="Leave Room" onClick={() => {window.location.reload()}}/>
+                    <Button variant="other" text="Leave Room" onClick={leaveRoom} />
                 </div>
-
-                <div className="flex justify-center p-4">
-                    {messages.length > 0 && messages[0]?.room && (
+                {roomName && (
+                    <div className="flex justify-center p-4">
                         <div className="max-w-lg px-4 py-2 rounded-lg bg-gray-600 transition-all animate-bounce duration-300">
                             <div className="text-lg text-center cursor-pointer text-white font-semibold">
-                                Welcome to the room <span className="text-red-500 hover:underline hover:-translate-y-2 font-bold">{messages[0].room} </span> !
+                                Welcome to the room <span className="text-red-500 hover:underline hover:-translate-y-2 font-bold">{roomName}</span>!
                             </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
-            {/* Messages Section */}
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
                         <div
-                            key={index}
-                            className={`max-w-lg px-4 py-2 rounded-lg hover:-translate-y-2 transition-all duration-300 ${msg.name === "You" ? "bg-blue-600 self-end" : "bg-gray-700"
+                            key={`${index}-${msg.timestamp}`}
+                            className={`max-w-lg px-4 py-2 rounded-lg transition-all duration-300 ${msg.isYou
+                                ? "bg-blue-600 ml-auto"
+                                : "bg-gray-700 mr-auto"
                                 }`}
-                            style={{
-                                alignSelf: msg.name === "You" ? "flex-end" : "flex-start",
-                            }}
                         >
-                            <div className="text-lg cursor-pointer font-semibold text-emerald-300"> <span className="text-white">||</span> <span className="hover:underline">{msg.name}</span> <span className="text-white">||</span></div>
-                            <div className="mt-1 cursor-pointer text-md font-semibold">{msg.message}</div>
+                            <div className="text-lg font-semibold text-emerald-300">
+                                <span className="text-white">||</span>{" "}
+                                <span>{msg.name}</span>{" "}
+                                <span className="text-white">||</span>
+                                {msg.isYou && <span className="ml-2 text-xs text-gray-200">(You)</span>}
+                            </div>
+                            <div className="mt-1 text-md font-semibold">{msg.message}</div>
                         </div>
                     ))
                 ) : (
                     <div className="text-center text-gray-400">No messages yet. Start chatting!</div>
                 )}
+                <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Section */}
             <div className="sticky bottom-0 bg-gray-800 p-4 flex items-center">
                 <input
                     type="text"
@@ -94,10 +142,11 @@ export const Room = ({ socket }: { socket: WebSocket }) => {
                     onKeyDown={handleKeyDown}
                     placeholder="Type your message..."
                     className="flex-1 px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
+                    autoFocus
                 />
                 <button
                     onClick={sendMessage}
-                    className="ml-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white"
+                    className="ml-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-semibold transition-colors duration-300"
                 >
                     Send
                 </button>

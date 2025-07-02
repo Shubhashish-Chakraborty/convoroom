@@ -3,11 +3,11 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { EnterRoom } from "../icons/EnterRoom";
 import { Redirect } from "../icons/Redirect";
-import { funnyHeadings } from "./funnyHeading";
-import { SERVER_URL } from "../config";
-import { Room } from "./Room";
 import { Navbar } from "../components/Navbar";
 import { Copy } from "../icons/Copy";
+import { SERVER_URL } from "../config";
+import { funnyHeadings } from "./funnyHeading";
+import { Room } from "./Room";
 
 export const JoinRoom = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -18,6 +18,7 @@ export const JoinRoom = () => {
     const [isRoomJoined, setIsRoomJoined] = useState(false);
     const [copyMessage, setCopyMessage] = useState("");
     const [copyMessageStatus, setCopyMessageStatus] = useState<"success" | "error" | null>(null);
+    const [username, setUsername] = useState("");
 
     // Connecting to WebSocket Server:
     useEffect(() => {
@@ -113,7 +114,7 @@ export const JoinRoom = () => {
     return (
         <div className="bg-custom-1 min-h-screen flex flex-col">
             {isRoomJoined ? (
-                <Room socket={socket as WebSocket} />
+                <Room socket={socket as WebSocket} username={username} />
             ) : (
                 <>
                     <Navbar />
@@ -140,7 +141,7 @@ export const JoinRoom = () => {
                             </h3>
 
                             <div className="w-full mb-4">
-                                <Input placeholder="Your Name" type="text" ref={nameRef} />
+                                <Input placeholder="Your Name" type="text" ref={nameRef} onChange={(e) => setUsername(e.target.value)} />
                             </div>
 
                             <div className="w-full mb-4">
@@ -154,13 +155,12 @@ export const JoinRoom = () => {
                                     />
                                 </div>
                                 <div
-                                    className={`text-center font-bold mt-2 ${
-                                        copyMessageStatus === "success"
+                                    className={`text-center font-bold mt-2 ${copyMessageStatus === "success"
                                             ? "text-green-500"
                                             : copyMessageStatus === "error"
-                                            ? "text-red-500"
-                                            : ""
-                                    }`}
+                                                ? "text-red-500"
+                                                : ""
+                                        }`}
                                 >
                                     {copyMessage}
                                 </div>
