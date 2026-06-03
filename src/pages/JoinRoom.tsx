@@ -19,6 +19,7 @@ export const JoinRoom = () => {
     const [copyMessage, setCopyMessage] = useState("");
     const [copyMessageStatus, setCopyMessageStatus] = useState<"success" | "error" | null>(null);
     const [username, setUsername] = useState("");
+    const [roomId, setRoomId] = useState("");
 
     // Connecting to WebSocket Server:
     useEffect(() => {
@@ -82,6 +83,7 @@ export const JoinRoom = () => {
         const enteredUsername = nameRef.current?.value;
 
         if (enteredRoomId && enteredUsername) {
+            setRoomId(enteredRoomId);
             socket?.send(
                 JSON.stringify({
                     type: "join",
@@ -114,7 +116,7 @@ export const JoinRoom = () => {
     return (
         <div className="bg-custom-1 min-h-screen flex flex-col">
             {isRoomJoined ? (
-                <Room socket={socket as WebSocket} username={username} />
+                <Room socket={socket as WebSocket} username={username} roomId={roomId} />
             ) : (
                 <>
                     <Navbar />
