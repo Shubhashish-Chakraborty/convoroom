@@ -1,1 +1,1 @@
-export const SERVER_URL = `http://convoroom-api.onrender.com`;
+export const SERVER_URL = `wss://convoroom-api.onrender.com`;
