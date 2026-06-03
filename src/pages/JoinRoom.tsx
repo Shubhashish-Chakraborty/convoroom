@@ -126,7 +126,7 @@ export const JoinRoom = () => {
                                 <div className="mr-1">Made by</div>
                                 <div
                                     onClick={() => {
-                                        window.open("https://imshubh.site");
+                                        window.open("https://shubhashish.me");
                                     }}
                                     className="text-blue-400 hover:underline flex"
                                 >
